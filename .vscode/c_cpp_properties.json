@@ -4,7 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/Users/finndooley/butano/**",
+                "~/butano/**",
                 "include/",
                 "build/"
             ],
