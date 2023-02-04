@@ -27,7 +27,7 @@
 #---------------------------------------------------------------------------------------------------------------------
 TARGET      :=  $(notdir $(CURDIR))
 BUILD       :=  build
-LIBBUTANO   :=  /Users/finndooley/butano/butano
+LIBBUTANO   :=  ~/butano/butano
 PYTHON      :=  python3
 SOURCES     :=  src
 INCLUDES    :=  include
