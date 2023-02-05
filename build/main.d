@@ -84,6 +84,7 @@ main.o: /Users/finndooley/Code/C++/GBA/snek/src/main.cpp \
  /Users/finndooley/butano/butano/include/bn_value_template_actions.h \
  /Users/finndooley/Code/C++/GBA/snek/include/bn_sprite_item.h \
  /Users/finndooley/butano/butano/include/bn_sprite_palette_ptr.h \
+ /Users/finndooley/butano/butano/include/bn_sprite_palette_item.h \
  /Users/finndooley/butano/butano/include/bn_sprite_tiles_ptr.h \
  /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_items_snek.h \
  /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_items_apple.h \
@@ -92,7 +93,6 @@ main.o: /Users/finndooley/Code/C++/GBA/snek/src/main.cpp \
  /Users/finndooley/butano/butano/include/bn_bg_palette_ptr.h \
  /Users/finndooley/butano/butano/include/bn_regular_bg_ptr.h \
  /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_palette_items_fronkpalette.h \
- /Users/finndooley/butano/butano/include/bn_sprite_palette_item.h \
  /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_palette_items_greypalette.h \
  /Users/finndooley/Code/C++/GBA/snek/build/bn_regular_bg_items_background.h \
  /Users/finndooley/butano/butano/include/bn_regular_bg_item.h \
@@ -194,6 +194,7 @@ main.o: /Users/finndooley/Code/C++/GBA/snek/src/main.cpp \
 /Users/finndooley/butano/butano/include/bn_value_template_actions.h:
 /Users/finndooley/Code/C++/GBA/snek/include/bn_sprite_item.h:
 /Users/finndooley/butano/butano/include/bn_sprite_palette_ptr.h:
+/Users/finndooley/butano/butano/include/bn_sprite_palette_item.h:
 /Users/finndooley/butano/butano/include/bn_sprite_tiles_ptr.h:
 /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_items_snek.h:
 /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_items_apple.h:
@@ -202,7 +203,6 @@ main.o: /Users/finndooley/Code/C++/GBA/snek/src/main.cpp \
 /Users/finndooley/butano/butano/include/bn_bg_palette_ptr.h:
 /Users/finndooley/butano/butano/include/bn_regular_bg_ptr.h:
 /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_palette_items_fronkpalette.h:
-/Users/finndooley/butano/butano/include/bn_sprite_palette_item.h:
 /Users/finndooley/Code/C++/GBA/snek/build/bn_sprite_palette_items_greypalette.h:
 /Users/finndooley/Code/C++/GBA/snek/build/bn_regular_bg_items_background.h:
 /Users/finndooley/butano/butano/include/bn_regular_bg_item.h:

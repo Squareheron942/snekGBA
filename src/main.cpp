@@ -20,6 +20,7 @@
 #include "bn_sprite_item.h"
 #include "bn_sprite_ptr.h"
 #include "bn_sprite_palette_ptr.h"
+#include "bn_sprite_palette_item.h"
 #include "bn_display.h"
 #include "bn_sprite_tiles_ptr.h"
 #include "bn_sprite_items_snek.h"
@@ -329,20 +330,22 @@ class snek {
 
         void move() {
             log(to_string<8>(inputs.front()));
-            if ((inputs.front() == 3 && body[0].position.x - 1 == body[1].position.x) || (inputs.front() == 1 && body[0].position.x + 1 == body[1].position.x) || (inputs.front() == 2 && body[0].position.y - 1 == body[1].position.y) || (inputs.front() == 0 && body[0].position.y + 1 == body[1].position.y)) 
+
+            if (inputs.size() != 1) inputs.pop_front();
+
+            if ((inputs.front() == 3 && body[0].position.x - 1 == body[1].position.x) || (inputs.front() == 1 && body[0].position.x + 1 == body[1].position.x) || (inputs.front() == 2 && body[0].position.y + 1 == body[1].position.y) || (inputs.front() == 0 && body[0].position.y - 1 == body[1].position.y)) 
             {
                 inputs.pop_front();
                 inputs.push_front(previnput);
             }
-
-            if (inputs.size() != 1) inputs.pop_front();
             body[0].direction = inputs.front();
             previnput = inputs.front();
             // log(to_string<8>(previnput));
 
             // body[0].direction = direction;
 
-            body[0].sprite.value().set_bg_priority(2);
+            // body[0].sprite.value().set_bg_priority(1);
+            // a.sprite.value().set_bg_priority(1);
             for (int i = 0; i < length; i++) {
                 bodyPart part = body[i];
                 part.oldposition = part.position;
@@ -429,6 +432,8 @@ class snek {
             text_generator.generate(fixed_point(0, 64), text[2], text_sprites);
 
             while(!keypad::a_pressed() && !keypad::start_pressed() && !keypad::select_pressed()) core::update();
+            core::update();
+
             text_sprites.shrink(0);
             a.sprite.reset();
             
@@ -440,12 +445,6 @@ class snek {
 
             score = 0;
         }
-
-        // bool isBent(int i) {
-        //     if (i == 0 || i == length - 1) return false;
-
-        //     return !(body[i].direction == body[i + 1].direction);
-        // }
 
         int getBendDirection(int d0, int i) {
             // int d0 = body[i].direction;
@@ -469,19 +468,17 @@ class snek {
             return 0;
         }
 
-        // sprite_palette_ptr palettes[] {
-        //     sprite_items::snek.palette_item().create_palette(),
-        //     sprite_palette_items::fronkpalette.create_palette(),
-        //     sprite_palette_items::greypalette.create_palette()
-        // };
+        sprite_palette_ptr palettes[3] = {
+            sprite_items::snek.palette_item().create_palette(),
+            sprite_palette_items::fronkpalette.create_palette(),
+            sprite_palette_items::greypalette.create_palette()
+        };
 
         void update_palette() {
             save_data data;
             sram::read(data);
             for (int i = 0; i < length; i++) {
-                if (data.palette == 0) body[i].sprite.value().set_palette(sprite_items::snek.palette_item().create_palette());
-                else if (data.palette == 1) body[i].sprite.value().set_palette(sprite_palette_items::fronkpalette.create_palette());
-                else if (data.palette == 2) body[i].sprite.value().set_palette(sprite_palette_items::greypalette.create_palette());
+                body[i].sprite.value().set_palette(palettes[data.palette]);
             }
         }
 };
