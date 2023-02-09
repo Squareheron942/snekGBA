@@ -25,7 +25,6 @@
 #include "bn_sprite_tiles_ptr.h"
 #include "bn_sprite_items_snek.h"
 #include "bn_sprite_items_apple.h"
-#include "bn_sprite_items_bg.h"
 
 #include "bn_bg_palettes.h"
 #include "bn_bg_palette_ptr.h"
@@ -59,6 +58,17 @@ namespace
         difficulty;
         string_view name = {""};
     };
+}
+
+void win(sprite_text_generator text_generator) {
+    vector<sprite_ptr, 8> text_sprites;
+    while (!keypad::start_pressed()) {
+        text_sprites.shrink(0);
+
+        text_generator.generate(fixed_point(0, 0), "You Win!", text_sprites);
+
+        core::update();
+    }
 }
 
 void optionsScreen(sprite_text_generator text_generator) {
@@ -247,8 +257,6 @@ void apple::place() {
     sprite.value().set_position(position.x * 16, position.y * 16);
 
     sprite.value().set_tiles(sprite_items::apple.tiles_item().create_tiles(data.fruit));
-
-    log(to_string<16>("apple get"));
 }
 
 class bodyPart {
@@ -284,23 +292,12 @@ class bodyPart {
         }
 };
 
-int getDirectionToForwards(pos2 p0, pos2 p1) {
-    int dx = p0.x - p1.x;
-    int dy = p0.y - p1.y;
-
-    if (dy < 0) return 0;
-    if (dx > 0) return 1;
-    if (dy > 0) return 2;
-    if (dx < 0) return 3;
-    return 0;
-}
-
 class snek {
     public:
         int length = 2, previnput = 0;
         apple a;
         bool dead;
-        vector<bodyPart, 64> body;
+        vector<bodyPart, 160> *body = new vector<bodyPart, 160>();
         bn::list<int, 4> inputs;
 
         // 0 = up, 1 = right, 2 = down, 3 = left
@@ -308,8 +305,8 @@ class snek {
 
         snek() {
             inputs.push_front(0);
-            body.emplace_back(bodyPart(pos2(0, 0), sprite_items::snek.create_sprite(0, 0), 0, 0));
-            body.emplace_back(bodyPart(pos2(0, 1), sprite_items::snek.create_sprite(0, 0), 2, 0));
+            body->emplace_back(bodyPart(pos2(0, 0), sprite_items::snek.create_sprite(0, 0), 0, 0));
+            body->emplace_back(bodyPart(pos2(0, 1), sprite_items::snek.create_sprite(0, 0), 2, 0));
 
 
             save_data data;
@@ -324,36 +321,35 @@ class snek {
         }
 
         void addPart() {
-            body.emplace_back(bodyPart(body[length - 1].oldposition, sprite_items::snek.create_sprite(body[length - 1].oldposition.x, body[length - 1].oldposition.y), 2, getDirectionToForwards(body[length - 1].position, body[length - 1].oldposition)));
+            bodyPart part = body->at(length - 1);
+            body->emplace_back(bodyPart(part.oldposition, sprite_items::snek.create_sprite(part.oldposition.x, part.oldposition.y), 2, getDirectionToForwards(part.position, part.oldposition)));
             length++;
         }
 
         void move() {
-            log(to_string<8>(inputs.front()));
 
             if (inputs.size() != 1) inputs.pop_front();
 
-            if ((inputs.front() == 3 && body[0].position.x - 1 == body[1].position.x) || (inputs.front() == 1 && body[0].position.x + 1 == body[1].position.x) || (inputs.front() == 2 && body[0].position.y + 1 == body[1].position.y) || (inputs.front() == 0 && body[0].position.y - 1 == body[1].position.y)) 
+            bodyPart bPart0 = body->at(0);
+            bodyPart bPart1 = body->at(1);
+
+            if ((inputs.front() == 3 && bPart0.position.x - 1 == bPart1.position.x) || (inputs.front() == 1 && bPart0.position.x + 1 == bPart1.position.x) || (inputs.front() == 2 && bPart0.position.y + 1 == bPart1.position.y) || (inputs.front() == 0 && bPart0.position.y - 1 == bPart1.position.y)) 
             {
                 inputs.pop_front();
                 inputs.push_front(previnput);
             }
-            body[0].direction = inputs.front();
+            body->at(0).direction = inputs.front();
             previnput = inputs.front();
-            // log(to_string<8>(previnput));
 
-            // body[0].direction = direction;
 
-            // body[0].sprite.value().set_bg_priority(1);
-            // a.sprite.value().set_bg_priority(1);
             for (int i = 0; i < length; i++) {
-                bodyPart part = body[i];
+                bodyPart part = body->at(i);
                 part.oldposition = part.position;
                 int dir = part.direction;
                 part.turning = false;
 
                 if (i != 0) {
-                    dir = getDirectionToForwards(body[i - 1].oldposition, part.position);
+                    dir = getDirectionToForwards(body->at(i - 1).oldposition, part.position);
                     if (dir != part.direction) part.turning = true;
                     if (i != length - 1) part.setType(1);
                 }
@@ -368,13 +364,13 @@ class snek {
                 part.sprite.value().set_bg_priority(3);
 
                 if (i != 0) {
-                    dir = getDirectionToForwards(body[i - 1].position, part.position);
+                    dir = getDirectionToForwards(body->at(i - 1).position, part.position);
                     if (dir != part.direction) part.turning = true;
                 }
 
                 part.setDirection(dir);
 
-                body[i] = part;
+                body->at(i) = part;
 
                 if (i == 0 && part.position.x == a.position.x && part.position.y == a.position.y) {
                     score++;
@@ -382,8 +378,8 @@ class snek {
                     while(isOverlapping != 0) {
                         isOverlapping = 0;
                     a.place();
-                        for (int j = 0; j < body.size(); j++) {
-                            if (body[j].position == a.position) {
+                        for (int j = 0; j < body->size(); j++) {
+                            if (body->at(j).position == a.position) {
                                 isOverlapping++;
                             }
                         }
@@ -392,18 +388,18 @@ class snek {
                 }
             }
             for (int i = 0; i < length; i++) {
-                bodyPart part = body[i];
+                bodyPart part = body->at(i);
 
                 if (i > 0 && i < length - 1 && part.turning) {
-                    body[i].sprite.value().set_tiles(sprite_items::snek.tiles_item().create_tiles(12 + getBendDirection(part.direction, i)));
+                    body->at(i).sprite.value().set_tiles(sprite_items::snek.tiles_item().create_tiles(12 + getBendDirection(part.direction, i)));
                 }
             }
 
             for (int i = 0; i < length; i++) {
-                bodyPart part = body[i];
+                bodyPart part = body->at(i);
 
-                if (i != 0 && part.position.x == body[0].position.x && part.position.y == body[0].position.y) die();
-                if (i == 0 && (part.position.y > 4 || part.position.y < -4 || part.position.x < -7 || part.position.x > 7)) die();
+                if (i != 0 && part.position.x == body->at(0).position.x && part.position.y == body->at(0).position.y) die();
+                else if (i == 0 && (part.position.y > 4 || part.position.y < -4 || part.position.x < -7 || part.position.x > 7)) die();
             }
         }
 
@@ -444,11 +440,11 @@ class snek {
             dead = true;
 
             score = 0;
+
         }
 
         int getBendDirection(int d0, int i) {
-            // int d0 = body[i].direction;
-            int d1 = body[i + 1].direction;
+            int d1 = body->at(i + 1).direction;
 
             // 0 = |- 1 = |_ 2 = -| 3 = _|
 
@@ -478,8 +474,19 @@ class snek {
             save_data data;
             sram::read(data);
             for (int i = 0; i < length; i++) {
-                body[i].sprite.value().set_palette(palettes[data.palette]);
+                body->at(i).sprite.value().set_palette(palettes[data.palette]);
             }
+        }
+
+        int getDirectionToForwards(pos2 p0, pos2 p1) {
+            int dx = p0.x - p1.x;
+            int dy = p0.y - p1.y;
+
+            if (dy < 0) return 0;
+            if (dx > 0) return 1;
+            if (dy > 0) return 2;
+            if (dx < 0) return 3;
+            return 0;
         }
 };
 
@@ -527,8 +534,17 @@ int main()
 
     while(true)
     {
+        if (snake.dead) {
+            delete snake.body;
+            snake = snek();
+            bg.set_palette(colors[data.background]);
+            unpause(text_generator);
+        }
+
         sram::read(data);
         vector<sprite_ptr, 32> text_sprites;
+
+        if (score == 135) win(text_generator);
 
         text_generator.generate(fixed_point(-116, -72), string_view("Score: " + to_string<16>(score)), text_sprites);    
 
@@ -550,20 +566,6 @@ int main()
             if (snake.inputs.size() < 4) snake.inputs.push_back(2);
         }
 
-        if (snake.dead) {
-            snake = snek();
-            bg.set_palette(colors[data.background]);
-            unpause(text_generator);
-        }
-
-        if (counter < period) counter++;
-        else {
-            snake.move();
-            counter = 0;
-        }
-
-        if (score % 2 == 0) period = max(20 - score / 2 - 8 * data.difficulty, 0);
-
         if (keypad::start_pressed()) {
             core::update();
             text_generator.set_center_alignment();
@@ -584,6 +586,14 @@ int main()
             text_generator.set_left_alignment();
             text_sprites.shrink(0);
             unpause(text_generator);
+        }
+
+        if (score % 2 == 0) period = max(20 - score / 100 - 8 * data.difficulty, 0);
+
+        if (counter < period) counter++;
+        else {
+            snake.move();
+            counter = 0;
         }
         
         core::update();
