@@ -3,3 +3,5 @@
 
 # Ignore makefile files in code percentage
 *.mak linguist-detectable=false
+*.d linguist-detectable=false
+*.o linguist-detectable=false
