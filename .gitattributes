@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ignore makefile files in code percentage
+*.mak linguist-detectable=false
